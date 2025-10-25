@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,7 +9,7 @@ import java.util.Scanner;
 
 public class Menu_Driven_Logistic_Management_System {
     public static Scanner scanner = new Scanner(System.in);
-    public static final int MAX_CITIES = 30;
+    public static final int MAX_CITIES = 31;
     public static String filePathCities = "Cities.txt";
     private static final String [] Cities = new String[MAX_CITIES];
     private static int cityCount = 0;
@@ -56,7 +57,7 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
 
-
+//CITY MANAGEMENT
     private static void cityManagement() {
         int choice;
 
@@ -77,7 +78,7 @@ public class Menu_Driven_Logistic_Management_System {
                 case 1 -> addCity();
                 case 2 -> renameCity();
                 case 3 -> removeCity();
-                case 4 -> displayCities();
+                case 4 -> displayCityManagement();
                 case 0 -> System.out.println("Returning To Main Menu.....\n");
                 default -> System.out.println("Invalid Choice!");
             }
@@ -88,7 +89,7 @@ public class Menu_Driven_Logistic_Management_System {
         //read file
         try {
             List<String> lines = Files.readAllLines(Paths.get(filePathCities));
-            cityCount = Math.min(lines.size(), MAX_CITIES);
+            cityCount = Math.min(lines.size(), MAX_CITIES-1);
 
 
             //copy from the file to array
@@ -113,7 +114,7 @@ public class Menu_Driven_Logistic_Management_System {
             cityCount = 0;
         }
 
-        if (cityCount >= MAX_CITIES){
+        if (cityCount >= MAX_CITIES-1){
             System.out.println("Already Reached the limit!");
             return;
         }
@@ -190,7 +191,7 @@ public class Menu_Driven_Logistic_Management_System {
             return;
         }
 
-        displayCities();
+        displayCityManagement();
 
 
         while (true){
@@ -265,7 +266,7 @@ public class Menu_Driven_Logistic_Management_System {
             System.out.println("Please Enter at least a city Before REMOVE!");
             return;
         }
-        displayCities();
+        displayCityManagement();
 
         while (true){
             System.out.print("Enter the city number to REMOVE (or 'stop' to return to MAIN MENU): ");
@@ -306,7 +307,7 @@ public class Menu_Driven_Logistic_Management_System {
         }
 
     }
-    private static void displayCities(){
+    private static void displayCityManagement(){
 //        if (cityCount==0){
 //            System.out.println("Please Enter Cities First!");
 //            return;
@@ -382,7 +383,259 @@ public class Menu_Driven_Logistic_Management_System {
 
     }
 
+//DISTANCE MANAGEMENT
     private static void distanceManagement() {
+        displayCities();
+        loadExistingDis();
+
+        int choice;
+
+        do {
+            System.out.println("___Intercity Distance Management___");
+            System.out.println("Press 1 to Add/Edit Intercity Distances..");
+            System.out.println("Press 2 to display Current distances...");
+            System.out.println("Press 0 to go back to Main Menu...");
+            System.out.print("Enter Your Choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice){
+                case 1-> addIntercityDis();
+                case 2-> displayIntercityDis();
+                case 0-> System.out.println("Returning..");
+                default -> System.out.println("Enter a valid number!");
+            }
+        }while (choice!=0);
+    }
+    //add intercity distances
+    private static void addIntercityDis() {
+        System.out.println("Add Distance Between Two Cities");
+//Display Entered Cities
+        System.out.println("Available Cities");
+        for (int i = 0; i <cityCount ; i++) {
+            System.out.printf("C%d - %s\n",(i+1), cityNames.get(i));
+        }
+
+        //For Same City To Itself Distance should be ZERO
+
+
+        for (int i = 1; i <cityCount ; i++) {
+            if (intercityDistance[i][i]==null){
+                intercityDistance[i][i]="0 km";
+                //save self distances
+                try(FileWriter fileWriter = new FileWriter(filePathDistance,true)){
+                    fileWriter.write(String.format("C%d,C%d,0 km%n",i,i));
+
+                }catch(IOException e){
+                    System.out.println("File Not Found!"+e.getMessage());
+                }
+            }
+        }
+
+        //get city1 index
+        int cityIndex1 = getCityIndex("Enter First City ID: ");
+        if (cityIndex1==-1){
+            return;
+        }
+        //get city2 index
+        int cityIndex2 = getCityIndex("Enter Second City ID: ");
+        if (cityIndex2==-1){
+            return;
+        }
+        //same city distance check
+        if (cityIndex1==cityIndex2){
+            System.out.println("Distance From "+cityNames.get(cityIndex1)+" to "+ cityNames.get(cityIndex2)+" is 0 km");
+            intercityDistance[cityIndex1+1][cityIndex2+1] = "0 km";
+            saveDistance(cityIndex1,cityIndex2,"0 km");
+            return;
+        }
+
+        //add distance
+        while (true){
+            System.out.print("Enter Distance Between "+cityNames.get(cityIndex1)+" and "+cityNames.get(cityIndex2)+" (to closest decimal point in km) ");
+            String interCityDisSTR= scanner.nextLine().trim();
+
+            try {
+                int interCityDisINT = Integer.parseInt(interCityDisSTR);
+                if (interCityDisINT<0){
+                    System.out.println("Please Enter A Positive Number!");
+                    continue;
+                }
+
+                String  disWithUnit = interCityDisSTR + " km";
+
+
+                //validating symmetric positions
+                intercityDistance[cityIndex1+1][cityIndex2+1] = disWithUnit;
+                intercityDistance[cityIndex2+1][cityIndex1+1] = disWithUnit;
+                saveDistance(cityIndex1,cityIndex2,disWithUnit);
+
+                System.out.println("Distance Added Successfully!");
+                break;
+            }catch (NumberFormatException e){
+                System.out.println("Invalid Distance! Please Only use Numbers!");
+            }
+        }
+    }
+    //Display Current entered distances
+    private static void displayIntercityDis() {
+
+        String format = "%-10s";
+        System.out.println("Current Entered Intercity Distances..");
+        //header
+        System.out.printf("%-10s","");
+        for (int i = 1; i <= cityCount ; i++) {
+            System.out.printf(format,intercityDistance[0][i]);
+        }
+        System.out.println();
+
+        //data rows
+        for (int i = 1; i <= cityCount ; i++) {
+            System.out.printf(format,intercityDistance[i][0]);
+            for (int j = 1; j <=cityCount ; j++) {
+                String distance = (intercityDistance[i][j] == null) ? "---" : intercityDistance[i][j];
+                System.out.printf(format,distance);
+
+            }
+            System.out.println();
+
+
+        }
+    }
+    //Display Cities By Reading the file
+    public static void displayCities(){
+        try {
+            //System.out.println("That File exists.");
+//            String line;
+//            while ((line = reader.readLine()) != null){
+//                System.out.println(line);
+//            }
+            cityNames = Files.readAllLines(Paths.get(filePathCities));
+            cityCount = Math.min(cityNames.size(),(MAX_CITIES));
+//Assigning a unique ID to cities..C1,C2,C3,............
+            for (int i = 0; i <cityCount ; i++) {
+
+                String city = cityNames.get(i);
+                String cityID = "C"+(i+1);
+                intercityDistance[i+1][0] = cityID;
+                intercityDistance[0][i+1] = cityID;
+            }
+//            System.out.println("Cities with IDs...");
+//
+//            for (String[] row : intercityDistance) {
+//                for (String city : row){
+//                    if (city==null){
+//                        System.out.printf("%-15s","___");
+//                    }else if (city.startsWith("C")){
+//                        System.out.printf("%-15s",city);
+//                    }
+//
+//                }
+//                System.out.println();
+//            }
+
+            System.out.println("\n\n____City IDs for Cities____");
+
+            for (int i = 0; i < cityCount; i++) {
+                String cityID = "C"+(i+1);
+                String city = cityNames.get(i);
+                System.out.printf("%s %-5s \n",cityID,city);
+
+            }
+
+        }catch (FileNotFoundException e){
+            System.out.println("Could not locate file.");
+        }catch (IOException e){
+            System.out.println("Something Went Wrong.");
+        }
+
+    }
+    //get index of the city
+    public static int getCityIndex(String userInput){
+        while (true){
+            System.out.print(userInput);
+            String cityId = scanner.nextLine().trim().toUpperCase();
+
+            if (cityId.equalsIgnoreCase("STOP")){
+                return -1;
+            }
+
+            if (!cityId.matches("C\\d+")){
+                System.out.println("Invalid Format! Use C1, C2, C3,....");
+                continue;
+            }
+
+            try {
+                int cityIndex = Integer.parseInt(cityId.substring(1))-1;
+                if (cityIndex>=0 && cityIndex<cityCount){
+                    return cityIndex;
+                }else {
+                    System.out.println("City ID not Found.."+" (Available C1 to C"+cityCount+")");
+                }
+            }catch (NumberFormatException e){
+                System.out.println("Enter A Valid City ID!");
+            }
+        }
+
+    }
+    //save entered distances to a file
+    public static void saveDistance(int cityIndex1, int cityIndex2, String distance) {
+        try (FileWriter fileWriter = new FileWriter(filePathDistance,true)){
+            //write city ids and distance to the file
+            String cityRecords = String.format("C%d,C%d,%s%n",(cityIndex1+1),(cityIndex2+1),distance);
+            fileWriter.write(cityRecords);
+            System.out.println("Distance Saved Successfully!");
+
+
+        }catch (IOException e){
+            System.out.println("File Destination Couldn't Found!");
+
+        }
+
+
+    }
+    //load existing intercity distances to the array before the program runs
+    public static void loadExistingDis(){
+        try{
+            if (!Files.exists(Paths.get(filePathDistance))){
+                System.out.println("File Not Found!");
+                return;
+            }
+
+            List<String> lines = Files.readAllLines(Paths.get(filePathDistance));
+            for (String line : lines){
+                line= line.trim();
+                if (line.isEmpty()){
+                    continue;
+                }
+
+                //parsing city ids and distances
+
+                String[] parts = line.split(",");
+                if (parts.length==3){
+                    String city1ID = parts[0];
+                    String city2ID = parts[1];
+                    String distance = parts[2];
+
+                    //Extract City Numbers
+                    int city1 = Integer.parseInt(city1ID.substring(1))-1;
+                    int city2 = Integer.parseInt(city2ID.substring(1))-1;
+
+                    //updating with the existing cities
+                    if ((city1>0 && city1<cityCount) && (city2>0 && city2<cityCount)){
+                        intercityDistance[city1+1][city2+1] = distance;
+                        intercityDistance[city2+1][city1+1] = distance;
+                    }
+
+                }
+            }
+            System.out.println("Existing City Distances Were Added!");
+
+        }catch (IOException e){
+            System.out.println("File Not Found!" + e.getMessage());
+        }catch (NumberFormatException e){
+            System.out.println("Some Data maybe corrupted or Invalid data type!");
+        }
     }
 
     private static void vehicleManagement() {
