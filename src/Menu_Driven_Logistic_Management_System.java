@@ -1077,12 +1077,60 @@ public class Menu_Driven_Logistic_Management_System {
                 return;
             }
 
-            //findSimplestRoute(sourceCity,destinationCity,cityNames);
+            findSimplestRoute(sourceCity,destinationCity,cityNames);
         }catch (IOException e) {
             System.out.println("Error reading cities: " + e.getMessage());
         }
     }
 //find the simplest route
+    private static void findSimplestRoute(int sourceCity, int destinationCity, List<String> cityNames) {
+        List<List<Integer>> allRoutes = new ArrayList<>();
+        int[] routeDistance = new int[cityCount*cityCount];
+        int routeCount = 0;
+
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("            FINDING OPTIMAL ROUTE");
+        System.out.println("=".repeat(60));
+
+        //check the direct route
+        int directDistance = getDistance(sourceCity,destinationCity);
+        if (directDistance!=-1){
+            allRoutes.add(Arrays.asList(sourceCity,destinationCity));
+            routeDistance[routeCount] = directDistance;
+            routeCount++;
+            System.out.println("Direct Route Found: "+ directDistance+" km");
+
+        }else {
+            System.out.println("Direct Route Not Found");
+        }
+
+        //check 1 stop route
+        int oneStopRoute = 0;
+        for (int stopCity = 0; stopCity < cityCount ; stopCity++) {
+            if (stopCity==sourceCity || stopCity==destinationCity){
+                continue;
+            }
+            int distance1 = getDistance(sourceCity,stopCity);
+            int distance2 = getDistance(stopCity,destinationCity);
+
+            if (distance1 !=-1 && distance2!=-1){
+                int totalDistance = distance1 + distance2;
+                allRoutes.add(Arrays.asList(sourceCity,stopCity,destinationCity));
+                routeDistance[routeCount] = totalDistance;
+                routeCount++;
+                oneStopRoute++;
+            }
+
+        }
+        System.out.println("Found " + oneStopRoute + " one-stop routes");
+
+        // Display results
+        displaySimpleRouteResults(allRoutes, routeDistance, routeCount, sourceCity, destinationCity, cityNames);
+
+
+
+    }
+
 
 
 
