@@ -16,10 +16,12 @@ public class Menu_Driven_Logistic_Management_System {
     public static String filePathDistance = "Distance.txt";
     public static  String[][] intercityDistance = new String[MAX_CITIES][MAX_CITIES];
     public static List<String> cityNames;
-    public static final String [][] vehicleTypes = {{"Type","Capacity (kg)","Rate per km (LKR)","Avg Speed (km/h)","Fuel Efficiency (km/l)"},
-                                                    {"Van","1000","30","60","12"},
-                                                    {"Truck","5000","40","50","6"},
-                                                    {"Lorry","10000","80","45","4"},};
+    public static final int VEHICLE_TYPES = 3;
+    public static final String[] VEHICLE_NAMES = {"Van", "Truck", "Lorry"};
+    public static final int[] VEHICLE_CAPACITIES = {1000, 5000, 10000};
+    public static final int[] VEHICLE_RATES = {30, 40, 80};
+    public static final int[] VEHICLE_SPEEDS = {60, 50, 45};
+    public static final int[] VEHICLE_FUEL_EFFICIENCY = {12, 6, 4};
 
     public static void main(String[] args) {
         int mainChoice;
@@ -47,7 +49,7 @@ public class Menu_Driven_Logistic_Management_System {
                 case 1-> cityManagement ();
                 case 2-> distanceManagement();
                 case 3-> vehicleManagement();
-                case 4-> deliveryRequestHandling();
+                case 4-> deliveryRequestHandlingCalculations();
                 case 5-> leastDistance();
                 case 6-> performanceReports();
                 case 7-> sampleFinalOutput();
@@ -663,24 +665,178 @@ public class Menu_Driven_Logistic_Management_System {
     }
     //Display vehicle types with details
     private static void displayVehicleTypes() {
-        for (String [] row : Menu_Driven_Logistic_Management_System.vehicleTypes){
-            for (String vehicle : row){
-                System.out.printf("%-20s",vehicle);
+        System.out.println("\n=== Available Vehicle Types ===");
+        System.out.printf("%-20s %-20s %-20s %-20s %-20s%n",
+                "Type", "Capacity(kg)", "Rate per km (LKR)", "Avg Speed (km/h)", "Fuel Efficiency (km/l)");
+        System.out.println("-----------------------------------------------------------------------------------------------------------");
+
+        for (int i = 0; i < VEHICLE_TYPES; i++) {
+            System.out.printf("%-20s %-20d %-20d %-20d %-20d%n",
+                    VEHICLE_NAMES[i],
+                    VEHICLE_CAPACITIES[i],
+                    VEHICLE_RATES[i],
+                    VEHICLE_SPEEDS[i],
+                    VEHICLE_FUEL_EFFICIENCY[i]);
+        }
+        System.out.println();
+    }
+
+//DELIVERY HANDLING
+    private static void deliveryRequestHandlingCalculations(){
+        int choice;
+        do {
+            System.out.println("Press 1 To Enter Delivery Details..");
+            System.out.println("Press 2 To Show Calculations...");
+            System.out.println("Press 0 To Return To Main Menu.. ");
+            System.out.print("Enter Your Choice: ");
+            choice = scanner.nextInt();
+            switch (choice){
+                case 1 -> deliveryRequestHandling();
+                case 2-> calculations();
+                case 0-> System.out.println("Returning..");
+                default -> System.out.println("Enter A Valid Choice!");
             }
-            System.out.println();
+        }while (choice!=0);
+    }
+
+    private static void deliveryRequestHandling() {
+
+        try {
+            // Display available cities
+            List<String> displayCityNames = Files.readAllLines(Paths.get(filePathCities));
+            cityCount = Math.min(displayCityNames.size(), MAX_CITIES);
+            System.out.println("Available Cities:");
+            for (int i = 0; i < cityCount; i++) {
+                System.out.printf("C%d - %s%n", (i + 1), displayCityNames.get(i));
+            }
+
+        }catch (IOException e){
+            System.out.println("File Not Found!"+e.getMessage());
+        }
+
+        int sourceIndex = getCityIndex("Enter Source City ID: ");
+        if (sourceIndex == -1){
+            return;
+        }
+
+        int destinationIndex = getCityIndex("Enter Destination City ID: ");
+        if (destinationIndex == -1){
+            return;
+        }
+//equality of the cities check
+        if (sourceIndex==destinationIndex){
+            System.out.println("Source City AND Destination City Cannot be SAME!! ");
+            return;
+        }
+
+        //get the distance between entered cities
+        String intercityDistanceSTR = intercityDistance[sourceIndex+1][destinationIndex+1];
+        if (intercityDistanceSTR==null || intercityDistanceSTR.equals("---")){
+            System.out.println("Distances Are Not Available! Please Update Them First!");
+            return;
+
+        }
+
+
+        try{
+           int distanceWithoutKM = Integer.parseInt(intercityDistanceSTR.replace(" km",""));
+
+        }catch (NumberFormatException e){
+            System.out.println("Invalid format!");
+            return;
+        }
+
+        //display Vehicles available and selection
+        displayVehicles();
+        int vehicleType = getVehicleSelection();
+        //System.out.println("You Selected ");
+        if (vehicleType==-1){
+            return;
+        }
+
+        int weight = getWeight();
+        if (weight==-1){
+            return;
+        }
+
+        //validating the carrying capacity with the chose vehicle capacity
+        if (weight>VEHICLE_CAPACITIES[vehicleType]){
+            System.out.printf("Weight %d kg exceeds %s Capacity %d!",weight,VEHICLE_NAMES[vehicleType],VEHICLE_CAPACITIES[vehicleType]);
+            return;
+        }
+
+    }
+
+    private static int getWeight() {
+        while (true){
+            System.out.println("Enter The Package Weight (in kg to closest decimal point or 0 to cancel): ");
+            try{
+                int weight = scanner.nextInt();
+                scanner.nextLine();
+
+                if (weight==0){
+                    return -1;
+                } else if (weight>0) {
+                    return weight;
+
+                }else {
+                    System.out.println("Weight Must Be A Positive Number!");
+                }
+            }catch (Exception e){
+                System.out.println("Invalid Input");
+                scanner.nextLine();
+            }
         }
     }
 
+    private static void displayVehicles() {
+        System.out.println("Available Vehicles..");
+        for (int i = 0;i<3 ; i++) {
+            System.out.println(i+" "+VEHICLE_NAMES[i]);
 
-    private static void deliveryRequestHandling() {
+        }
     }
 
+    private static int getVehicleSelection(){
+        while (true){
+            System.out.print("Select Vehicle Type (0 to Cancel): ");
+            try{
+                int choice = scanner.nextInt();
+                scanner.nextLine();
+
+                if (choice==0){
+                    return -1;
+                }
+                if (choice >= 1 && choice <= 3) {
+                    return choice - 1; // Convert to 0-based index
+                }else {
+                    System.out.println("Enter A Given Value");
+                }
+
+
+            }catch (Exception e){
+                System.out.println("Enter A Valid Input!");
+                scanner.nextLine();
+            }
+        }
+    }
+
+    public static void calculations(){
+
+    }
+
+
+    //LEAST DISTANCE
     private static void leastDistance() {
     }
 
+
+//PERFORMANCE REPORTS
     private static void performanceReports() {
     }
 
+
+//FINAL OUTPUT
     private static void sampleFinalOutput() {
     }
 
