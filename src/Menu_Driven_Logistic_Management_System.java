@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -34,15 +35,15 @@ public class Menu_Driven_Logistic_Management_System {
     public static int currentWeight = -1;
     public static int currentVehicleType = -1;
     public static List<String> currentCityNames = null;
-
-
-
-
-
     // Delivery Records
     public static final int MAX_DELIVERIES = 50;
     public static String[] deliveryRecords = new String[MAX_DELIVERIES];
     public static int deliveryCount = 0;
+
+    // Route Finding System
+    private static List<List<Integer>> allRoutes = new ArrayList<>();
+    private static int[] bestRoute;
+    private static int bestDistance = Integer.MAX_VALUE;
 
     public static void main(String[] args) {
         int mainChoice;
@@ -724,6 +725,7 @@ public class Menu_Driven_Logistic_Management_System {
             }
         }while (choice!=0);
    }
+   //getting inputs from the user for delivery requests
     public static void deliveryRequestHandling(){
         List<String> displayCityNames = null;
         int distanceWithoutKM = 0;
@@ -1024,6 +1026,8 @@ public class Menu_Driven_Logistic_Management_System {
             System.out.println("Couldn't Find The File."+e.getMessage());
         }
     }
+
+    //loading existing delivery records
     public static void loadDeliveryRecords(){
         try{
             if (!Files.exists(Paths.get(filePathDeliveries))){
@@ -1051,18 +1055,38 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
 
-
-
-
-
-
-
     //LEAST DISTANCE
     private static void leastDistance() {
+        try{
+            List<String> cityNames = Files.readAllLines(Paths.get(filePathCities));
+            cityCount = Math.min(cityNames.size(), MAX_CITIES-1);
+
+            System.out.println("Available Cities:");
+            for (int i = 0; i < cityCount; i++) {
+                System.out.printf("C%d - %s%n", (i + 1), cityNames.get(i));
+            }
+
+            // Get source and destination cities
+            int sourceCity = getCityIndex("Enter Source City ID: ");
+            if (sourceCity == -1){
+                return;
+            }
+
+            int destinationCity = getCityIndex("Enter Destination City ID: ");
+            if (destinationCity == -1) {
+                return;
+            }
+
+            //findSimplestRoute(sourceCity,destinationCity,cityNames);
+        }catch (IOException e) {
+            System.out.println("Error reading cities: " + e.getMessage());
+        }
     }
+//find the simplest route
 
 
-//PERFORMANCE REPORTS
+
+    //PERFORMANCE REPORTS
     private static void performanceReports() {
     }
 
