@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Menu_Driven_Logistic_Management_System {
     public static Scanner scanner = new Scanner(System.in);
@@ -1163,11 +1164,44 @@ public class Menu_Driven_Logistic_Management_System {
             String routeStr = formatSimpleRoute(allRoutes.get(i), cityNames);
             String status = (i == 0) ? "BEST" : "";
 
-            System.out.printf("%-4d %-40s %-12s %-10s%n",
-                    i + 1, routeStr, routeDistance[i] + " km", status);
+            System.out.printf("%-4d %-40s %-12s %-10s%n", (i + 1), routeStr, routeDistance[i] + " km", status);
         }
+        System.out.print("-".repeat(80));
+
+        //set best Route
+        bestRoute = allRoutes.get(0).stream().mapToInt(i->j).toArray();
+        bestDistance = routeDistance[0];
+
+        //show best route details
+        displayBestRouteDetails(cityNames);
+        useBestRouteForDelivery(sourceCity,destinationCity,cityNames);
 
     }
+    //display best route details
+    private static void displayBestRouteDetails(List<String> cityNames) {
+        System.out.println("\n BEST ROUTE FOUND");
+        System.out.println("Route: " + formatSimpleRoute(Arrays.stream(bestRoute).boxed().collect(Collectors.toList()),cityNames));
+        System.out.println("Total Distance: " + bestDistance+ " km");
+
+        System.out.println("\nRoute Breakdown");
+        int totalCalculated = 0;
+        for (int i = 0; i < bestRoute.length - 1; i++) {
+            int from = bestRoute[i];
+            int to = bestRoute[i + 1];
+            int segmentDistance = getDistance(from, to);
+            totalCalculated += segmentDistance;
+
+            System.out.printf("  %s → %s: %d km%n",
+                    cityNames.get(from), cityNames.get(to), segmentDistance);
+        }
+
+        System.out.printf("Total: %d km (verified)%n", totalCalculated);
+    }
+
+//use the found best route for the next shipment
+    private static void useBestRouteForDelivery(int sourceCity, int destinationCity, List<String> cityNames) {
+    }
+
 
     private static int getDistance(int sourceCity, int destinationCity) {
         String distanceStr = intercityDistance[sourceCity + 1][destinationCity + 1];
@@ -1180,6 +1214,16 @@ public class Menu_Driven_Logistic_Management_System {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+    // Format route for display
+    private static String formatSimpleRoute(List<Integer> route, List<String> cityNames) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < route.size(); i++) {
+            if (i > 0) sb.append(" → ");
+            sb.append(cityNames.get(route.get(i)));
+            sb.append("(C").append(route.get(i) + 1).append(")");
+        }
+        return sb.toString();
     }
 
 
