@@ -61,6 +61,30 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
     private static void cityManagement() {
+        int choice;
+
+        do {
+            System.out.println("____City Management____");
+            System.out.println("Make sure to ADD cities before rename, remove or display cities.");
+            System.out.println("Press 1 to Add New City..");
+            System.out.println("Press 2 to Rename City..");
+            System.out.println("Press 3 to Remove City..");
+            System.out.println("Press 4 to Display Entered Cities..");
+            System.out.println("Press 0 to Exit..");
+            System.out.print("Enter Your Choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();
+
+
+            switch (choice){
+                case 1 -> addCity();
+                case 2 -> renameCity();
+                case 3 -> removeCity();
+                case 4 -> displayCities();
+                case 0 -> System.out.println("Returning To Main Menu.....");
+                default -> System.out.println("Invalid Choice!");
+            }
+        }while(choice!=0);
     }
 
 
