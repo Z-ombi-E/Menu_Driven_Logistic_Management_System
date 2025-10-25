@@ -36,6 +36,8 @@ public class Menu_Driven_Logistic_Management_System {
 
 
 
+
+
     // Delivery Records
     public static final int MAX_DELIVERIES = 50;
     public static String[] deliveryRecords = new String[MAX_DELIVERIES];
@@ -905,6 +907,65 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
     public static void finalOutput(){
+        //Checking the saved inputs are not empty
+        if (currentSourceIndex==-1|| currentDestinationIndex==-1|| currentDistance==-1||currentWeight==-1|| currentVehicleType==-1|| currentCityNames==null){
+            System.out.println("You Should Enter Details Before Calculations!");
+            System.out.println("First Go to the option 1 and enter the data!");
+            return;
+        }
+
+        // Assigning again the imported values to new variables
+        int sourceIndex = currentSourceIndex;
+        int destinationIndex = currentDestinationIndex;
+        int distance = currentDistance;
+        int weight = currentWeight;
+        int vehicleType = currentVehicleType;
+        List<String> cityNames = currentCityNames;
+
+        //get the other information from the arrays
+        String vehicleName = VEHICLE_NAMES[vehicleType];
+        int rate = VEHICLE_RATES[vehicleType];
+        int speed = VEHICLE_SPEEDS[vehicleType];
+        int fuelEfficiency = VEHICLE_FUEL_EFFICIENCY[vehicleType];
+
+        //THE REAL CALCULATIONS BEGIN.....
+        //a.delivery cost
+        double deliveryCost = distance * rate * (1+ weight * (1.0/10000.0));
+        //b.estimated time
+        double estimatedDeliveryTime = (double) distance /speed;
+        //c.fuel consumption/used
+        double fuelUsed = (double) distance/fuelEfficiency;
+        //d.fuel cost
+        double fuelCost  = fuelUsed * FUEL_PRICE;
+        //e.Total Operational Cost
+        double totalOperationalCost = deliveryCost + fuelCost;
+        //f.Profit Calculation
+        double profit = (deliveryCost*PROFIT_MARKUP);
+        //g.Final Charge
+        double finalCharge = totalOperationalCost + profit;
+
+
+        //Final Output
+
+        System.out.println("\n"+"=".repeat(70));
+        System.out.println("|DELIVERY COST ESTIMATION|");
+        System.out.println("-".repeat(70));
+        System.out.printf("Route:               %s (C%d) -> %s (C%d)%n",cityNames.get(sourceIndex),sourceIndex+1,cityNames.get(destinationIndex),destinationIndex+1);
+        System.out.printf("Minimum Distance:    %d km%n",distance);
+        System.out.printf("Vehicle:             %s%n",vehicleType);
+        System.out.printf("Weight:              %d%n",weight);
+        System.out.println();
+        System.out.println("-".repeat(70));
+        System.out.println();
+        System.out.printf("Base Cost:                 %d x %d x (1 + %d x (1/10000) = LKR %.2f%n",distance,rate,weight,deliveryCost);
+        System.out.printf("Fuel Used:                 %d / %d                       = %.2f%n L",distance,fuelEfficiency,fuelUsed);
+        System.out.printf("Fuel Cost:                 %.2f x %.2f                   = LKR %.2f%n",fuelUsed,FUEL_PRICE,fuelCost);
+        System.out.printf("Operational Cost:          %.2f + %.2f                   = LKR %.2f%n",deliveryCost,fuelCost,totalOperationalCost);
+        System.out.printf("Profit:                    %.2f x %.2f                   = LKR %.2f%n",deliveryCost,PROFIT_MARKUP,profit);
+        System.out.printf("Customer Charges:          %.2f + %.2f                   = LKR %.2f%n",totalOperationalCost,profit,finalCharge);
+        System.out.println("=".repeat(70));
+
+
 
     }
 
