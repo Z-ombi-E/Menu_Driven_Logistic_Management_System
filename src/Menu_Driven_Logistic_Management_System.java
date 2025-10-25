@@ -13,7 +13,7 @@ public class Menu_Driven_Logistic_Management_System {
     public static final int MAX_CITIES = 31;
     public static String filePathCities = "Cities.txt";
     public static String filePathDistance = "Distance.txt";
-    public static final String getFilePathDeliveries = "Deliveries.txt";
+    public static final String filePathDeliveries = "Deliveries.txt";
     private static final String [] Cities = new String[MAX_CITIES];
     private static int cityCount = 0;
     public static  String[][] intercityDistance = new String[MAX_CITIES][MAX_CITIES];
@@ -704,6 +704,7 @@ public class Menu_Driven_Logistic_Management_System {
 
 //delivery handling and Calculation
     private static void deliveryRequestHandlingCalculations() {
+        loadDeliveryRecords();
 
         int choice;
         do {
@@ -1016,11 +1017,36 @@ public class Menu_Driven_Logistic_Management_System {
     }
 //saving delivery records to a file
     private static void saveDeliveryRecordsToFile(String record) {
-        try (FileWriter fileWriter = new FileWriter(getFilePathDeliveries,true)){
+        try (FileWriter fileWriter = new FileWriter(filePathDeliveries,true)){
             fileWriter.write(record+"\n");
 
         }catch (IOException e){
             System.out.println("Couldn't Find The File."+e.getMessage());
+        }
+    }
+    public static void loadDeliveryRecords(){
+        try{
+            if (!Files.exists(Paths.get(filePathDeliveries))){
+                System.out.println("No Existing Delivery Records!");
+                return;
+            }
+            List<String> lines = Files.readAllLines(Paths.get(filePathDeliveries));
+            int loaded= 0;
+            for (String line : lines){
+                if (loaded>=MAX_DELIVERIES){
+                    break;
+                }
+                if (line.trim().isEmpty()){
+                    continue;
+                }
+                deliveryRecords[loaded] = line;
+                loaded++;
+
+            }
+            deliveryCount = loaded;
+            System.out.println("Loaded " + loaded + " delivery records.");
+        }catch (IOException e) {
+            System.out.println("Error loading records: " + e.getMessage());
         }
     }
 
