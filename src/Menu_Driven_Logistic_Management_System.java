@@ -788,7 +788,7 @@ public class Menu_Driven_Logistic_Management_System {
         currentVehicleType = vehicleType;
         currentCityNames = displayCityNames;
 
-        System.out.printf("The Distance Between %s to %s is %d km%n.",displayCityNames.get(sourceIndex),displayCityNames.get(destinationIndex),distanceWithoutKM);
+        System.out.printf("The Distance Between %s to %s is %d km%n",displayCityNames.get(sourceIndex),displayCityNames.get(destinationIndex),distanceWithoutKM);
         System.out.printf("Chosen Vehicle Type is %s%n",VEHICLE_NAMES[vehicleType]);
         System.out.printf("Package Weight : %d kg%n",weight);
         System.out.println("Delivery Request Saved Successfully!");
@@ -798,7 +798,7 @@ public class Menu_Driven_Logistic_Management_System {
     //get a valid weight from the user
     public static int getWeight(){
         while (true){
-            System.out.println("Enter The Package Weight (in kg to closest decimal point or 0 to cancel): ");
+            System.out.print("Enter The Package Weight (in kg to closest decimal point or 0 to cancel): ");
             try{
                 int weight = scanner.nextInt();
                 scanner.nextLine();
@@ -947,27 +947,79 @@ public class Menu_Driven_Logistic_Management_System {
 
         //Final Output
 
-        System.out.println("\n"+"=".repeat(70));
+        System.out.println("\n"+"=".repeat(75));
         System.out.println("|DELIVERY COST ESTIMATION|");
-        System.out.println("-".repeat(70));
+        System.out.println("-".repeat(75));
         System.out.printf("Route:               %s (C%d) -> %s (C%d)%n",cityNames.get(sourceIndex),sourceIndex+1,cityNames.get(destinationIndex),destinationIndex+1);
         System.out.printf("Minimum Distance:    %d km%n",distance);
-        System.out.printf("Vehicle:             %s%n",vehicleType);
-        System.out.printf("Weight:              %d%n",weight);
+        System.out.printf("Vehicle:             %s%n",vehicleName);
+        System.out.printf("Weight:              %d kg%n",weight);
         System.out.println();
-        System.out.println("-".repeat(70));
+        System.out.println("-".repeat(75));
         System.out.println();
         System.out.printf("Base Cost:                 %d x %d x (1 + %d x (1/10000) = LKR %.2f%n",distance,rate,weight,deliveryCost);
-        System.out.printf("Fuel Used:                 %d / %d                       = %.2f%n L",distance,fuelEfficiency,fuelUsed);
-        System.out.printf("Fuel Cost:                 %.2f x %.2f                   = LKR %.2f%n",fuelUsed,FUEL_PRICE,fuelCost);
-        System.out.printf("Operational Cost:          %.2f + %.2f                   = LKR %.2f%n",deliveryCost,fuelCost,totalOperationalCost);
-        System.out.printf("Profit:                    %.2f x %.2f                   = LKR %.2f%n",deliveryCost,PROFIT_MARKUP,profit);
-        System.out.printf("Customer Charges:          %.2f + %.2f                   = LKR %.2f%n",totalOperationalCost,profit,finalCharge);
-        System.out.println("=".repeat(70));
+        System.out.printf("Fuel Used:                 %d / %d = %.2f L%n",distance,fuelEfficiency,fuelUsed);
+        System.out.printf("Fuel Cost:                 %.2f x %.2f = LKR %.2f%n",fuelUsed,FUEL_PRICE,fuelCost);
+        System.out.printf("Operational Cost:          %.2f + %.2f = LKR %.2f%n",deliveryCost,fuelCost,totalOperationalCost);
+        System.out.printf("Profit:                    %.2f x %.2f = LKR %.2f%n",deliveryCost,PROFIT_MARKUP,profit);
+        System.out.printf("Customer Charges:          %.2f + %.2f = LKR %.2f%n",totalOperationalCost,profit,finalCharge);
+        System.out.println("=".repeat(75));
+
+        // Save to delivery records
+        saveDeliveryRecordsToArray(sourceIndex, destinationIndex, distance, vehicleType, weight,
+                deliveryCost, fuelUsed, fuelCost,totalOperationalCost,
+                profit, finalCharge, estimatedDeliveryTime, cityNames);
+        System.out.println("Delivery Records Saved!");
 
 
 
     }
+//saving delivery records to array
+    private static void saveDeliveryRecordsToArray(int sourceIndex, int destinationIndex, int distance, int vehicleType, int weight, double deliveryCost, double fuelUsed, double fuelCost, double totalOperationalCost, double profit, double finalCharge, double estimatedDeliveryTime, List<String> cityNames) {
+        //Array Size check
+        if (deliveryCount>=MAX_DELIVERIES){
+            System.out.println("Delivery Records Are Full!");
+            System.out.println("Removing Oldest Record.....");
+            for (int i = 0; i <MAX_DELIVERIES ; i++) {
+                deliveryRecords[i] = deliveryRecords[i+1];
+
+
+            }
+            deliveryCount = MAX_DELIVERIES-1;
+        }
+        //time and date
+        String timeStamp  = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+        //saving to array
+        String record = String.format("%s|%s|%s|%d|%s|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f",
+                timeStamp,
+                cityNames.get(sourceIndex),
+                cityNames.get(destinationIndex),
+                distance,
+                VEHICLE_NAMES[vehicleType],
+                weight,
+                deliveryCost,
+                fuelUsed,
+                fuelCost,
+                totalOperationalCost,
+                profit,
+                finalCharge,
+                estimatedDeliveryTime);
+
+        deliveryRecords[deliveryCount] = record;
+        deliveryCount++;
+
+        saveDeliveryRecordsToFile(record);
+
+
+    }
+//saving delivery records to a file
+    private static void saveDeliveryRecordsToFile(String record) {
+    }
+
+
+
+
 
 
 
