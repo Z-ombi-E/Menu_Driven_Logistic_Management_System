@@ -2,6 +2,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,14 @@ public class Menu_Driven_Logistic_Management_System {
     public static final int[] VEHICLE_RATES = {30, 40, 80};
     public static final int[] VEHICLE_SPEEDS = {60, 50, 45};
     public static final int[] VEHICLE_FUEL_EFFICIENCY = {12, 6, 4};
+    public static final double FUEL_PRICE = 400.0;
+    public static final double PROFIT_MARKUP = 0.25;
+    public static List<String> displayCityNames;
+
+    // Delivery Records
+    public static final int MAX_DELIVERIES = 50;
+    public static String[] deliveryRecords = new String[MAX_DELIVERIES];
+    public static int deliveryCount = 0;
 
     public static void main(String[] args) {
         int mainChoice;
@@ -36,10 +45,9 @@ public class Menu_Driven_Logistic_Management_System {
             System.out.println("Press 1 to Enter City Management.. ");
             System.out.println("Press 2 to Enter Distance Management.. ");
             System.out.println("Press 3 to Enter Vehicle Management.. ");
-            System.out.println("Press 4 to Enter Delivery Request Handling And Calculations.. ");
+            System.out.println("Press 4 to Enter Delivery Request Handling And Calculations And The Sample OUTPUT.. ");
             System.out.println("Press 5 to Enter To Find The Least-Cost Route (Least-Distance) .. ");
             System.out.println("Press 6 to Enter To Get Reports.. ");
-            System.out.println("Press 7 to Get a Sample Output for a DELIVERY..  ");
             System.out.println("Press 0 to EXIT....");
             System.out.print("Enter Your Choice: ");
             mainChoice = scanner.nextInt();
@@ -52,7 +60,6 @@ public class Menu_Driven_Logistic_Management_System {
                 case 4-> deliveryRequestHandlingCalculations();
                 case 5-> leastDistance();
                 case 6-> performanceReports();
-                case 7-> sampleFinalOutput();
                 case 0-> System.out.println("See You Again! Thank You for Using Our System!😊😊");
                 default -> System.out.println("Enter a VALID Choice!!");
             }
@@ -63,7 +70,9 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
 
-//CITY MANAGEMENT
+
+
+    //CITY MANAGEMENT
     private static void cityManagement() {
         int choice;
 
@@ -681,29 +690,31 @@ public class Menu_Driven_Logistic_Management_System {
         System.out.println();
     }
 
-//DELIVERY HANDLING
-    private static void deliveryRequestHandlingCalculations(){
+//delivery handling and Calculation
+    private static void deliveryRequestHandlingCalculations() {
         int choice;
         do {
             System.out.println("Press 1 To Enter Delivery Details..");
             System.out.println("Press 2 To Show Calculations...");
+            System.out.println("Press 3 To Show Output with All Calculations");
             System.out.println("Press 0 To Return To Main Menu.. ");
             System.out.print("Enter Your Choice: ");
             choice = scanner.nextInt();
+            scanner.nextLine();
             switch (choice){
                 case 1 -> deliveryRequestHandling();
                 case 2-> calculations();
+                case 3 -> finalOutput();
                 case 0-> System.out.println("Returning..");
                 default -> System.out.println("Enter A Valid Choice!");
             }
         }while (choice!=0);
-    }
-
-    private static void deliveryRequestHandling() {
-
+   }
+    public static void deliveryRequestHandling(){
+        int distanceWithoutKM = 0;
         try {
             // Display available cities
-            List<String> displayCityNames = Files.readAllLines(Paths.get(filePathCities));
+            displayCityNames = Files.readAllLines(Paths.get(filePathCities));
             cityCount = Math.min(displayCityNames.size(), MAX_CITIES);
             System.out.println("Available Cities:");
             for (int i = 0; i < cityCount; i++) {
@@ -713,44 +724,27 @@ public class Menu_Driven_Logistic_Management_System {
         }catch (IOException e){
             System.out.println("File Not Found!"+e.getMessage());
         }
-
-        int sourceIndex = getCityIndex("Enter Source City ID: ");
-        if (sourceIndex == -1){
+        //Get source and destination cities indexes
+        int sourceIndex = getCityIndex("Enter Source City Index: ");
+        if (sourceIndex==-1){
             return;
         }
-
-        int destinationIndex = getCityIndex("Enter Destination City ID: ");
-        if (destinationIndex == -1){
+        int destinationIndex = getCityIndex("Enter Destination City Index: ");
+        if (destinationIndex==-1){
             return;
         }
-//equality of the cities check
-        if (sourceIndex==destinationIndex){
-            System.out.println("Source City AND Destination City Cannot be SAME!! ");
-            return;
-        }
-
         //get the distance between entered cities
         String intercityDistanceSTR = intercityDistance[sourceIndex+1][destinationIndex+1];
         if (intercityDistanceSTR==null || intercityDistanceSTR.equals("---")){
             System.out.println("Distances Are Not Available! Please Update Them First!");
             return;
-
         }
-
-
+        //pass the obtain value to an INT
         try{
-           int distanceWithoutKM = Integer.parseInt(intercityDistanceSTR.replace(" km",""));
+            distanceWithoutKM = Integer.parseInt(intercityDistanceSTR.replace(" km","").trim());
 
         }catch (NumberFormatException e){
             System.out.println("Invalid format!");
-            return;
-        }
-
-        //display Vehicles available and selection
-        displayVehicles();
-        int vehicleType = getVehicleSelection();
-        //System.out.println("You Selected ");
-        if (vehicleType==-1){
             return;
         }
 
@@ -758,16 +752,27 @@ public class Menu_Driven_Logistic_Management_System {
         if (weight==-1){
             return;
         }
-
-        //validating the carrying capacity with the chose vehicle capacity
+        displayVehicles();
+        int vehicleType = getVehicleSelection();
+        //System.out.println("You Selected ");
+        if (vehicleType==-1){
+            return;
+        }
+        //validating the carrying capacity with the chosen vehicle's capacity
         if (weight>VEHICLE_CAPACITIES[vehicleType]){
-            System.out.printf("Weight %d kg exceeds %s Capacity %d!",weight,VEHICLE_NAMES[vehicleType],VEHICLE_CAPACITIES[vehicleType]);
+            System.out.printf("Weight %d kg exceeds %s Capacity %d!%n",weight,VEHICLE_NAMES[vehicleType],VEHICLE_CAPACITIES[vehicleType]);
             return;
         }
 
-    }
+        System.out.printf("The Distance Between %s to %s is %d km%n.",displayCityNames.get(sourceIndex),displayCityNames.get(destinationIndex),distanceWithoutKM);
+        System.out.printf("Chosen Vehicle Type is %s%n",VEHICLE_NAMES[vehicleType]);
+        System.out.printf("Package Weight : %d kg%n",weight);
+        System.out.println("Delivery Request Saved Successfully!");
 
-    private static int getWeight() {
+
+    }
+    //get a valid weight from the user
+    public static int getWeight(){
         while (true){
             System.out.println("Enter The Package Weight (in kg to closest decimal point or 0 to cancel): ");
             try{
@@ -787,16 +792,18 @@ public class Menu_Driven_Logistic_Management_System {
                 scanner.nextLine();
             }
         }
+
     }
 
+    //display available vehicle list
     private static void displayVehicles() {
         System.out.println("Available Vehicles..");
         for (int i = 0;i<3 ; i++) {
-            System.out.println(i+" "+VEHICLE_NAMES[i]);
+            System.out.println((i+1)+" "+VEHICLE_NAMES[i]);
 
         }
     }
-
+    //Get vehicle by index
     private static int getVehicleSelection(){
         while (true){
             System.out.print("Select Vehicle Type (0 to Cancel): ");
@@ -810,7 +817,7 @@ public class Menu_Driven_Logistic_Management_System {
                 if (choice >= 1 && choice <= 3) {
                     return choice - 1; // Convert to 0-based index
                 }else {
-                    System.out.println("Enter A Given Value");
+                    System.out.println("Enter A Given Value!");
                 }
 
 
@@ -825,6 +832,12 @@ public class Menu_Driven_Logistic_Management_System {
 
     }
 
+    public static void finalOutput(){
+
+    }
+
+
+
 
     //LEAST DISTANCE
     private static void leastDistance() {
@@ -836,9 +849,7 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
 
-//FINAL OUTPUT
-    private static void sampleFinalOutput() {
-    }
+
 
 
 
