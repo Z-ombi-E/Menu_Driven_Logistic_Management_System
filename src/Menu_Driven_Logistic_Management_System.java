@@ -12,9 +12,10 @@ public class Menu_Driven_Logistic_Management_System {
     public static Scanner scanner = new Scanner(System.in);
     public static final int MAX_CITIES = 31;
     public static String filePathCities = "Cities.txt";
+    public static String filePathDistance = "Distance.txt";
+    public static final String getFilePathDeliveries = "Deliveries.txt";
     private static final String [] Cities = new String[MAX_CITIES];
     private static int cityCount = 0;
-    public static String filePathDistance = "Distance.txt";
     public static  String[][] intercityDistance = new String[MAX_CITIES][MAX_CITIES];
     public static List<String> cityNames;
     public static final int VEHICLE_TYPES = 3;
@@ -1015,6 +1016,12 @@ public class Menu_Driven_Logistic_Management_System {
     }
 //saving delivery records to a file
     private static void saveDeliveryRecordsToFile(String record) {
+        try (FileWriter fileWriter = new FileWriter(getFilePathDeliveries,true)){
+            fileWriter.write(record+"\n");
+
+        }catch (IOException e){
+            System.out.println("Couldn't Find The File."+e.getMessage());
+        }
     }
 
 
