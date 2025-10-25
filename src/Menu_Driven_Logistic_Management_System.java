@@ -1132,7 +1132,7 @@ public class Menu_Driven_Logistic_Management_System {
 
 
     }
-
+//display the simplest route
     private static void displaySimpleRouteResults(List<List<Integer>> allRoutes, int[] routeDistance, int routeCount, int sourceCity, int destinationCity, List<String> cityNames) {
         if (routeCount==0){
             System.out.println("No Valid Routes Found Between These cities");
@@ -1236,7 +1236,7 @@ public class Menu_Driven_Logistic_Management_System {
 
     }
 
-
+//get distance from the indexes which is user gave
     private static int getDistance(int sourceCity, int destinationCity) {
         String distanceStr = intercityDistance[sourceCity + 1][destinationCity + 1];
         if (distanceStr == null || distanceStr.equals("---")) {
@@ -1263,6 +1263,69 @@ public class Menu_Driven_Logistic_Management_System {
 
     //PERFORMANCE REPORTS
     private static void performanceReports() {
+        if (deliveryCount == 0) {
+            System.out.println("\n No delivery records found! Please complete some deliveries first.");
+            return;
+        }
+
+        System.out.println("\n" + "=".repeat(80));
+        System.out.println("                       PERFORMANCE REPORTS");
+        System.out.println("=".repeat(80));
+
+        //Calculate required statistics
+
+        int totalDeliveries = deliveryCount;
+        int totalDistance = 0;
+        double totalDeliveryTime = 0;
+        double totalRevenue  = 0;
+        double totalProfit = 0;
+        int longestRoute = 0;
+        int shortestRoute = Integer.MAX_VALUE;
+
+        for (int i = 0; i <deliveryCount ; i++) {
+            String record = deliveryRecords[i];
+            String[] parts = record.split("\\|");
+            if (parts.length>=13){
+                //extract data from the array
+                int distance = Integer.parseInt(parts[3]);
+                double deliveryTime = Double.parseDouble(parts[12]);
+                double revenue = Double.parseDouble(parts[11]);
+                double profit = Double.parseDouble(parts[10]);
+
+                // Update totals
+                totalDistance += distance;
+                totalDeliveryTime += deliveryTime;
+                totalRevenue += revenue;
+                totalProfit += profit;
+
+                // Update longest/shortest routes
+                if (distance > longestRoute) {
+                    longestRoute = distance;
+                }
+                if (distance < shortestRoute) {
+                    shortestRoute = distance;
+                }
+            }
+
+        }
+        // Calculate averages
+        double averageDeliveryTime = totalDeliveryTime / totalDeliveries;
+
+        // Display Report
+        System.out.println("-".repeat(80));
+        System.out.printf("Total Deliveries Completed: %d deliveries%n", totalDeliveries);
+        System.out.printf("Total Distance Covered: %,d km%n", totalDistance);
+        System.out.printf("Average Delivery Time: %.2f hours%n", averageDeliveryTime);
+        System.out.printf("Total Revenue: LKR %,.2f%n", totalRevenue);
+        System.out.printf("Total Profit: LKR %,.2f%n", totalProfit);
+        System.out.printf("Longest Route: %,d km%n", longestRoute);
+        System.out.printf("Shortest Route: %,d km%n", shortestRoute);
+
+        System.out.println("-".repeat(80));
+
+
+
+
     }
 
 
