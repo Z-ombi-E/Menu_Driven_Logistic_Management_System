@@ -26,6 +26,15 @@ public class Menu_Driven_Logistic_Management_System {
     public static final double FUEL_PRICE = 400.0;
     public static final double PROFIT_MARKUP = 0.25;
     public static List<String> displayCityNames;
+    //for calculations
+    public static int currentSourceIndex = -1;
+    public static int currentDestinationIndex = -1;
+    public static int currentDistance = -1;
+    public static int currentWeight = -1;
+    public static int currentVehicleType = -1;
+    public static List<String> currentCityNames = null;
+
+
 
     // Delivery Records
     public static final int MAX_DELIVERIES = 50;
@@ -692,10 +701,11 @@ public class Menu_Driven_Logistic_Management_System {
 
 //delivery handling and Calculation
     private static void deliveryRequestHandlingCalculations() {
+
         int choice;
         do {
             System.out.println("Press 1 To Enter Delivery Details..");
-            System.out.println("Press 2 To Show Calculations...");
+            System.out.println("Press 2 To Do Calculations...");
             System.out.println("Press 3 To Show Output with All Calculations");
             System.out.println("Press 0 To Return To Main Menu.. ");
             System.out.print("Enter Your Choice: ");
@@ -711,7 +721,12 @@ public class Menu_Driven_Logistic_Management_System {
         }while (choice!=0);
    }
     public static void deliveryRequestHandling(){
+        List<String> displayCityNames = null;
         int distanceWithoutKM = 0;
+        int sourceIndex = -1;
+        int destinationIndex = -1;
+        int weight = -1;
+        int vehicleType = -1;
         try {
             // Display available cities
             displayCityNames = Files.readAllLines(Paths.get(filePathCities));
@@ -725,11 +740,11 @@ public class Menu_Driven_Logistic_Management_System {
             System.out.println("File Not Found!"+e.getMessage());
         }
         //Get source and destination cities indexes
-        int sourceIndex = getCityIndex("Enter Source City Index: ");
+        sourceIndex = getCityIndex("Enter Source City Index: ");
         if (sourceIndex==-1){
             return;
         }
-        int destinationIndex = getCityIndex("Enter Destination City Index: ");
+        destinationIndex = getCityIndex("Enter Destination City Index: ");
         if (destinationIndex==-1){
             return;
         }
@@ -748,12 +763,12 @@ public class Menu_Driven_Logistic_Management_System {
             return;
         }
 
-        int weight = getWeight();
+        weight = getWeight();
         if (weight==-1){
             return;
         }
         displayVehicles();
-        int vehicleType = getVehicleSelection();
+        vehicleType = getVehicleSelection();
         //System.out.println("You Selected ");
         if (vehicleType==-1){
             return;
@@ -763,6 +778,13 @@ public class Menu_Driven_Logistic_Management_System {
             System.out.printf("Weight %d kg exceeds %s Capacity %d!%n",weight,VEHICLE_NAMES[vehicleType],VEHICLE_CAPACITIES[vehicleType]);
             return;
         }
+        //store inputs to public variables to get them to the calculation method
+        currentSourceIndex = sourceIndex;
+        currentDestinationIndex = destinationIndex;
+        currentDistance = distanceWithoutKM;
+        currentWeight = weight;
+        currentVehicleType = vehicleType;
+        currentCityNames = displayCityNames;
 
         System.out.printf("The Distance Between %s to %s is %d km%n.",displayCityNames.get(sourceIndex),displayCityNames.get(destinationIndex),distanceWithoutKM);
         System.out.printf("Chosen Vehicle Type is %s%n",VEHICLE_NAMES[vehicleType]);
@@ -827,8 +849,58 @@ public class Menu_Driven_Logistic_Management_System {
             }
         }
     }
-
+//CALCULATIONS
     public static void calculations(){
+        //Checking the saved inputs are not empty
+        if (currentSourceIndex==-1|| currentDestinationIndex==-1|| currentDistance==-1||currentWeight==-1|| currentVehicleType==-1|| currentCityNames==null){
+            System.out.println("You Should Enter Details Before Calculations!");
+            System.out.println("First Go to the option 1 and enter the data!");
+            return;
+        }
+
+        // Assigning again the imported values to new variables
+        int sourceIndex = currentSourceIndex;
+        int destinationIndex = currentDestinationIndex;
+        int distance = currentDistance;
+        int weight = currentWeight;
+        int vehicleType = currentVehicleType;
+        List<String> cityNames = currentCityNames;
+
+        //get the other information from the arrays
+        String vehicleName = VEHICLE_NAMES[vehicleType];
+        int rate = VEHICLE_RATES[vehicleType];
+        int speed = VEHICLE_SPEEDS[vehicleType];
+        int fuelEfficiency = VEHICLE_FUEL_EFFICIENCY[vehicleType];
+
+        //THE REAL CALCULATIONS BEGIN.....
+        //a.delivery cost
+        double deliveryCost = distance * rate * (1+ weight * (1.0/10000.0));
+        //b.estimated time
+        double estimatedDeliveryTime = (double) distance /speed;
+        //c.fuel consumption/used
+        double fuelUsed = (double) distance/fuelEfficiency;
+        //d.fuel cost
+        double fuelCost  = fuelUsed * FUEL_PRICE;
+        //e.Total Operational Cost
+        double totalOperationalCost = deliveryCost + fuelCost;
+        //f.Profit Calculation
+        double profit = (deliveryCost*PROFIT_MARKUP);
+        //g.Final Charge
+        double finalCharge = totalOperationalCost + profit;
+
+        System.out.println(deliveryCost);
+        System.out.println(estimatedDeliveryTime);
+        System.out.println(fuelUsed);
+        System.out.println(fuelCost);
+        System.out.println(totalOperationalCost);
+        System.out.println(profit);
+        System.out.println(finalCharge);
+
+        System.out.println("Calculations Done!");
+        System.out.println("Go to Option 3 For Display the Full Detailed Output!😊😊");
+
+
+
 
     }
 
