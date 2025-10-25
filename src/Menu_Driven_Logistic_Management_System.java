@@ -2,13 +2,14 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
+
 
 public class Menu_Driven_Logistic_Management_System {
     public static Scanner scanner = new Scanner(System.in);
@@ -387,7 +388,7 @@ public class Menu_Driven_Logistic_Management_System {
     //saving cities to Cities.txt line by line
     private static void saveToFile(){
         try{
-            java.util.List<String> saveCities = new ArrayList<>();
+            List<String> saveCities = new ArrayList<>();
             for (int i = 0; i <cityCount ; i++) {
                 if (Cities[i] != null) {
                     saveCities.add(Cities[i]);
@@ -993,7 +994,7 @@ public class Menu_Driven_Logistic_Management_System {
             deliveryCount = MAX_DELIVERIES-1;
         }
         //time and date
-        String timeStamp  = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        String timeStamp  = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
         //saving to array
         String record = String.format("%s|%s|%s|%d|%s|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f",
@@ -1169,7 +1170,11 @@ public class Menu_Driven_Logistic_Management_System {
         System.out.print("-".repeat(80));
 
         //set best Route
-        bestRoute = allRoutes.get(0).stream().mapToInt(i->j).toArray();
+        List<Integer> bestRouteList = allRoutes.get(0);
+        bestRoute = new int[bestRouteList.size()];
+        for (int i = 0; i < bestRouteList.size(); i++) {
+            bestRoute[i] = bestRouteList.get(i);
+        }
         bestDistance = routeDistance[0];
 
         //show best route details
@@ -1205,6 +1210,30 @@ public class Menu_Driven_Logistic_Management_System {
 
 //use the found best route for the next shipment
     private static void useBestRouteForDelivery(int sourceCity, int destinationCity, List<String> cityNames) {
+        System.out.println("\nDo You Want To Use The Best Route For The Delivery Calculations? (y/n): ");
+        String response = scanner.nextLine().trim().toLowerCase();
+
+        if (response.equals("y")||response.equals("yes")){
+            currentSourceIndex = sourceCity;
+            currentDestinationIndex = destinationCity;
+            currentDistance = bestDistance;
+            currentCityNames = cityNames;
+
+            System.out.println("\n Best Route Saved for delivery calculations!");
+            System.out.println("Now Use The Delivery Request Handling In Main Menu With the New Distances And Cities!!😊😊");
+
+            //Show Comparison with the direct Route
+
+            int directDistance = getDistance(sourceCity,destinationCity);
+            if (directDistance!=-1 && directDistance!= bestDistance){
+                int savings = directDistance - bestDistance;
+                System.out.printf("Distance savings: %d km (was %d km, now %d km)%n", savings, directDistance, bestDistance);
+
+            }else {
+                System.out.println("Route not Saved. But You Can Still Use the Direct Route!!");
+            }
+        }
+
     }
 
 
