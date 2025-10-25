@@ -1180,8 +1180,13 @@ public class Menu_Driven_Logistic_Management_System {
     //display best route details
     private static void displayBestRouteDetails(List<String> cityNames) {
         System.out.println("\n BEST ROUTE FOUND");
-        System.out.println("Route: " + formatSimpleRoute(Arrays.stream(bestRoute).boxed().collect(Collectors.toList()),cityNames));
-        System.out.println("Total Distance: " + bestDistance+ " km");
+        List<Integer> routeList = new ArrayList<>();
+        for (int cityIndex : bestRoute) {
+            routeList.add(cityIndex);
+        }
+
+        System.out.println("Route: " + formatSimpleRoute(routeList, cityNames));
+        System.out.println("Total Distance: " + bestDistance + " km");
 
         System.out.println("\nRoute Breakdown");
         int totalCalculated = 0;
