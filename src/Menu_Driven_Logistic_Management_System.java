@@ -911,7 +911,7 @@ public class Menu_Driven_Logistic_Management_System {
 
 
     }
-
+//To get the final output
     public static void finalOutput(){
         //Checking the saved inputs are not empty
         if (currentSourceIndex==-1|| currentDestinationIndex==-1|| currentDistance==-1||currentWeight==-1|| currentVehicleType==-1|| currentCityNames==null){
@@ -1057,7 +1057,8 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
 
-    //LEAST DISTANCE
+
+//LEAST DISTANCE
     private static void leastDistance() {
         try{
             List<String> cityNames = Files.readAllLines(Paths.get(filePathCities));
@@ -1084,7 +1085,7 @@ public class Menu_Driven_Logistic_Management_System {
             System.out.println("Error reading cities: " + e.getMessage());
         }
     }
-//find the simplest route
+   //find the simplest route
     private static void findSimplestRoute(int sourceCity, int destinationCity, List<String> cityNames) {
         List<List<Integer>> allRoutes = new ArrayList<>();
         int[] routeDistance = new int[cityCount*cityCount];
@@ -1132,7 +1133,7 @@ public class Menu_Driven_Logistic_Management_System {
 
 
     }
-//display the simplest route
+   //display the simplest route
     private static void displaySimpleRouteResults(List<List<Integer>> allRoutes, int[] routeDistance, int routeCount, int sourceCity, int destinationCity, List<String> cityNames) {
         if (routeCount==0){
             System.out.println("No Valid Routes Found Between These cities");
@@ -1208,7 +1209,7 @@ public class Menu_Driven_Logistic_Management_System {
         System.out.printf("Total: %d km (verified)%n", totalCalculated);
     }
 
-//use the found best route for the next shipment
+   //use the found best route for the next shipment
     private static void useBestRouteForDelivery(int sourceCity, int destinationCity, List<String> cityNames) {
         System.out.println("\nDo You Want To Use The Best Route For The Delivery Calculations? (y/n): ");
         String response = scanner.nextLine().trim().toLowerCase();
@@ -1229,14 +1230,14 @@ public class Menu_Driven_Logistic_Management_System {
                 int savings = directDistance - bestDistance;
                 System.out.printf("Distance savings: %d km (was %d km, now %d km)%n", savings, directDistance, bestDistance);
 
-            }else {
-                System.out.println("Route not Saved. But You Can Still Use the Direct Route!!");
             }
+        }else {
+            System.out.println("Route not Saved. But You Can Still Use the Direct Route!!");
         }
 
     }
 
-//get distance from the indexes which is user gave
+    //get distance from the indexes which is user gave
     private static int getDistance(int sourceCity, int destinationCity) {
         String distanceStr = intercityDistance[sourceCity + 1][destinationCity + 1];
         if (distanceStr == null || distanceStr.equals("---")) {
@@ -1261,7 +1262,7 @@ public class Menu_Driven_Logistic_Management_System {
     }
 
 
-    //PERFORMANCE REPORTS
+//PERFORMANCE REPORTS
     private static void performanceReports() {
         if (deliveryCount == 0) {
             System.out.println("\n No delivery records found! Please complete some deliveries first.");
