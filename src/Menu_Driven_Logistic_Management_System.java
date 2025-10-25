@@ -1131,7 +1131,56 @@ public class Menu_Driven_Logistic_Management_System {
 
     }
 
+    private static void displaySimpleRouteResults(List<List<Integer>> allRoutes, int[] routeDistance, int routeCount, int sourceCity, int destinationCity, List<String> cityNames) {
+        if (routeCount==0){
+            System.out.println("No Valid Routes Found Between These cities");
+            return;
+        }
+        for (int i = 0; i <routeCount-1 ; i++) {
+            for (int j = i; j < routeCount ; j++) {
+                if (routeDistance[j]<routeDistance[i]){
+                    //swap distances
+                    int tempDistance = routeDistance[i];
+                    routeDistance[i] = routeDistance[j];
+                    routeDistance[j] = tempDistance;
 
+                    //swap routes
+                    List<Integer> tempRoute = allRoutes.get(i);
+                    allRoutes.set(i, allRoutes.get(j));
+                    allRoutes.set(j,tempRoute);
+
+                }
+            }
+        }
+        System.out.println("\n"+"=".repeat(80));
+        System.out.println("                      ROUTE ANALYSIS RESULTS");
+        System.out.println("=".repeat(80));
+
+        System.out.printf("From: %s (C%d) -> To: %s (C%d)%n",cityNames.get(sourceCity),sourceCity+1,cityNames.get(destinationCity),destinationCity+1);
+        System.out.printf("%-4s %-40s %-12s %-10s%n", "Rank", "Route", "Distance", "Status");
+        System.out.println("-".repeat(80));
+        for (int i = 0; i < routeCount; i++) {
+            String routeStr = formatSimpleRoute(allRoutes.get(i), cityNames);
+            String status = (i == 0) ? "BEST" : "";
+
+            System.out.printf("%-4d %-40s %-12s %-10s%n",
+                    i + 1, routeStr, routeDistance[i] + " km", status);
+        }
+
+    }
+
+    private static int getDistance(int sourceCity, int destinationCity) {
+        String distanceStr = intercityDistance[sourceCity + 1][destinationCity + 1];
+        if (distanceStr == null || distanceStr.equals("---")) {
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(distanceStr.replace(" km", "").trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
 
 
     //PERFORMANCE REPORTS
