@@ -16,11 +16,15 @@ public class Menu_Driven_Logistic_Management_System {
     public static String filePathDistance = "Distance.txt";
     public static  String[][] intercityDistance = new String[MAX_CITIES][MAX_CITIES];
     public static List<String> cityNames;
+    public static final String [][] vehicleTypes = {{"Type","Capacity (kg)","Rate per km (LKR)","Avg Speed (km/h)","Fuel Efficiency (km/l)"},
+                                                    {"Van","1000","30","60","12"},
+                                                    {"Truck","5000","40","50","6"},
+                                                    {"Lorry","10000","80","45","4"},};
 
     public static void main(String[] args) {
         int mainChoice;
         String name;
-        System.out.println("Please Enter Your Name Before Using Our System😊😊:  ");
+        System.out.print("Please Enter Your Name Before Using Our System😊😊:  ");
         name = scanner.nextLine();
         String cappedName = capitalizeFirstLetter(name);
 
@@ -308,7 +312,7 @@ public class Menu_Driven_Logistic_Management_System {
 
     }
     private static void displayCityManagement(){
-//        if (cityCount==0){
+     //        if (cityCount==0){
 //            System.out.println("Please Enter Cities First!");
 //            return;
 //        }
@@ -515,7 +519,7 @@ public class Menu_Driven_Logistic_Management_System {
 //Assigning a unique ID to cities..C1,C2,C3,............
             for (int i = 0; i <cityCount ; i++) {
 
-                String city = cityNames.get(i);
+//                String city = cityNames.get(i);
                 String cityID = "C"+(i+1);
                 intercityDistance[i+1][0] = cityID;
                 intercityDistance[0][i+1] = cityID;
@@ -638,8 +642,35 @@ public class Menu_Driven_Logistic_Management_System {
         }
     }
 
+
+//VEHICLE MANAGEMENT
     private static void vehicleManagement() {
+        int choice;
+        do {
+            System.out.println("___Vehicle Management___");
+            System.out.println("Press 1 to Display Available Vehicle Types with All Details..");
+            System.out.println("Press 0 to Return to Main Menu..");
+            System.out.print("Enter Choice: ");
+            choice = scanner.nextInt();
+
+            switch (choice){
+                case 1 -> displayVehicleTypes();
+                case 0 -> System.out.println("Returning to Main Menu...");
+                default -> System.out.println("Enter A Valid Number!");
+            }
+
+        }while (choice !=0);
     }
+    //Display vehicle types with details
+    private static void displayVehicleTypes() {
+        for (String [] row : Menu_Driven_Logistic_Management_System.vehicleTypes){
+            for (String vehicle : row){
+                System.out.printf("%-20s",vehicle);
+            }
+            System.out.println();
+        }
+    }
+
 
     private static void deliveryRequestHandling() {
     }
