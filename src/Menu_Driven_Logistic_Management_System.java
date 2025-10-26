@@ -337,6 +337,7 @@ public class Menu_Driven_Logistic_Management_System {
         }
 
     }
+    //display cities
     private static void displayCityManagement(){
      //        if (cityCount==0){
 //            System.out.println("Please Enter Cities First!");
